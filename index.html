@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Spell Vision — Wand Casting</title>
+  <link rel="stylesheet" href="./css/style.css" />
+
+  <!-- Import map: lets us `import 'three'` and MediaPipe with no build step.
+       Everything is served as static files; this just resolves bare specifiers. -->
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/",
+      "tasks-vision": "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/vision_bundle.mjs"
+    }
+  }
+  </script>
+</head>
+<body>
+  <!-- Hidden source video element fed to MediaPipe; the visible feed is the WebGL plane. -->
+  <video id="input-video" playsinline autoplay muted></video>
+
+  <!-- Three.js renders here: webcam plane + wand + spell particles + bloom. -->
+  <canvas id="three-canvas"></canvas>
+
+  <!-- Debug overlay: raw/smoothed landmarks (toggle with D). -->
+  <canvas id="overlay-canvas"></canvas>
+
+  <!-- UI / HUD -->
+  <div id="hud">
+    <div id="status-row">
+      <span id="cam-status" class="badge off">cam</span>
+      <span id="mic-status" class="badge off">mic</span>
+      <span id="hand-status" class="badge off">hand</span>
+      <span id="fps" class="badge">-- fps</span>
+    </div>
+
+    <div id="heard">
+      <span class="label">heard</span>
+      <span id="heard-word">—</span>
+    </div>
+
+    <!-- Fallback for when voice doesn't pick up "wand" (also bound to the W key). -->
+    <button id="summon-btn" type="button">✦ Summon Wand</button>
+
+    <div id="spellbook">
+      <div class="spell-chip" data-type="fire">Incendio</div>
+      <div class="spell-chip" data-type="force">Depulso</div>
+      <div class="spell-chip" data-type="light">Lumos</div>
+      <div class="spell-chip" data-type="slash">Diffindo</div>
+    </div>
+  </div>
+
+  <!-- First-load gate: browsers require a user gesture before mic/cam + audio context. -->
+  <div id="start-screen">
+    <div class="start-card">
+      <h1>✦ Spell Vision ✦</h1>
+      <p class="tagline">Cast spells with your hand and your voice.</p>
+      <ol class="howto">
+        <li>Allow <strong>camera</strong> and <strong>microphone</strong> when prompted.</li>
+        <li>Say <strong>“wand”</strong> to summon your wand.</li>
+        <li><strong>Pinch</strong> (thumb + index) to grab it — it follows your hand.</li>
+        <li>Point, then say a spell: <em>Incendio, Depulso, Lumos, Diffindo</em>.</li>
+      </ol>
+      <button id="start-btn">Begin</button>
+      <p class="fineprint">Best in Chrome / Edge on desktop. Press <kbd>D</kbd> to toggle hand-tracking debug.</p>
+    </div>
+  </div>
+
+  <div id="error-banner" class="hidden"></div>
+
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>
