@@ -73,6 +73,20 @@ feedback). The mic listens continuously and restarts itself automatically.
 | `3` | Lumos (light)   |
 | `4` | Diffindo (slash)|
 | `D` | Toggle hand-tracking debug overlay |
+| `O` | Cycle held object (wand / sphere / cube / cylinder — realism test probes) |
+| `M` | Cycle test-shape material (matte / glossy / mirror) |
+| `L` | Toggle webcam-driven lighting match (A/B against the fixed studio lights) |
+| `G` | Toggle film grain |
+
+### Clip mode — run a video file through the live pipeline
+
+Append `?src=<file>` to feed a clip instead of the webcam, e.g.
+`http://localhost:8000/index.html?src=Test.mp4`. Same loop, same tracking,
+real-time speed; the wand auto-summons and the composited canvas is recorded,
+auto-downloading as **`live_composite.webm`** when the clip ends (then the clip
+loops for interactive replay — all hotkeys still work). Unmirrored by default
+so the output lines up frame-for-frame with the source; add `&mirror=1` for
+the selfie view. Voice is disabled in this mode; use the keyboard.
 
 ---
 
@@ -132,6 +146,33 @@ smoothing → wand follow/grab → wand tip + forward → spell particle emitter
 UnrealBloomPass → screen. The webcam is rendered as an in-scene plane so the
 bloom pass composites correctly (bloom `threshold` keeps the normal feed from
 glowing while bright additive spells exceed it).
+
+## Photoreal wand experiments (Wan VACE, offline)
+
+The live wand is a stylized 3D render composited over the webcam — it can't
+match the scene's real lighting/shadows. To test the photoreal ceiling, there's
+an **offline AI pipeline** that reinserts the wand into a recorded clip with a
+video diffusion model (Wan 2.1 VACE) running on Google Colab:
+
+1. **Record a clip** (~5 s) of your hand making a fist/pinch grip and moving
+   around, as if holding a wand. Any camera; landscape; good light.
+2. Open **`export.html`** (same static server as the app). Load the clip and
+   click *Process*. It runs the exact same tracking + wand pipeline offline
+   (un-mirrored, frame-accurate) and downloads a ZIP:
+   - `frames/` — raw video frames
+   - `masks/` — the wand's visible silhouette per frame (white = "generate the
+     wand here", already occluded by your fingers via the depth occluder)
+   - `composite/` — the crude live-style render, for debugging
+3. Open **`colab/SpellVision_VACE.ipynb`** in Google Colab on a GPU runtime
+   (free T4 works; L4/A100 is much faster). Upload the ZIP plus a **wand
+   reference image** (wand on a white background), run all cells, and download
+   `wand_result.mp4` / `wand_compare.mp4`.
+
+VACE regenerates only the masked wand region — guided by the mask's shape, the
+reference image, and the prompt — so the wand comes back with scene-matched
+lighting, soft shadows, and correct occlusion. This is *minutes per clip*, not
+real time; it exists to prove the quality target before investing in the live
+pipeline (better hand mesh, PBR wand asset, lighting match).
 
 ## Performance notes
 

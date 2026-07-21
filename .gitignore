@@ -1,0 +1,9 @@
+# Video / capture output
+*.mp4
+*.webm
+*.mov
+*.mkv
+*.gif
+
+# Export archives
+*.zip
